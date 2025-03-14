@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shitcar</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; }
+        canvas { background: white; border: 1px solid black; }
+    </style>
+</head>
+<body>
+    <h1>Shitcar</h1>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <p>Current Speed: <span id="speed">50</span> km/h (Probably too fast for this junker)</p>
+    <p>Fines: $<span id="fine">0</span> (Your wallet is crying)</p>
+    <button onclick="increaseSpeed()">Step on it! 🚀</button>
+    <button onclick="decreaseSpeed()">Brake before we die! 🛑</button>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        let speed = 50;
+        let speedLimit = Math.floor(Math.random() * 41) + 30;
+        let fine = 0;
+        let speedCameraY = -100;
+        
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw speed limit sign
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, speedCameraY, 30, 0, Math.PI * 2);
+            ctx.fillStyle = "red";
+            ctx.fill();
+            ctx.closePath();
+            
+            ctx.fillStyle = "white";
+            ctx.font = "20px Arial";
+            ctx.fillText(speedLimit, canvas.width / 2 - 10, speedCameraY + 5);
+            
+            // Draw car (or what’s left of it)
+            ctx.fillStyle = "blue";
+            ctx.fillRect(canvas.width / 2 - 40, canvas.height - 100, 80, 40);
+            
+            // Move speed camera
+            speedCameraY += 5;
+            if (speedCameraY > canvas.height) {
+                speedCameraY = -100;
+                speedLimit = Math.floor(Math.random() * 41) + 30;
+                if (speed !== speedLimit) {
+                    fine += Math.abs(speed - speedLimit) * 10;
+                    alert("You got caught speeding! Your bank account is now $" + fine + " lighter.");
+                }
+                document.getElementById("fine").innerText = fine;
+            }
+            
+            requestAnimationFrame(draw);
+        }
+        
+        function increaseSpeed() {
+            speed++;
+            document.getElementById("speed").innerText = speed;
+        }
+        
+        function decreaseSpeed() {
+            speed--;
+            document.getElementById("speed").innerText = speed;
+        }
+        
+        draw();
+    </script>
+</body>
+</html>
