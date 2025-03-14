@@ -5,53 +5,73 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shitcar</title>
     <style>
-        body { text-align: center; font-family: Arial, sans-serif; }
-        canvas { background: white; border: 1px solid black; }
+        body { text-align: center; font-family: Arial, sans-serif; background: #87CEEB; overflow: hidden; }
+        canvas { background: #2c3e50; display: block; margin: auto; }
     </style>
 </head>
 <body>
     <h1>Shitcar</h1>
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
-    <p>Current Speed: <span id="speed">50</span> km/h (Probably too fast for this junker)</p>
-    <p>Fines: $<span id="fine">0</span> (Your wallet is crying)</p>
+    <canvas id="gameCanvas"></canvas>
+    <p>Current Speed: <span id="speed">50</span> km/h (Still too fast for this bucket of bolts)</p>
+    <p>Fines: $<span id="fine">0</span> (Might as well sell the car)</p>
     <button onclick="increaseSpeed()">Step on it! 🚀</button>
-    <button onclick="decreaseSpeed()">Brake before we die! 🛑</button>
+    <button onclick="decreaseSpeed()">Brake before we explode! 🛑</button>
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
         let speed = 50;
         let speedLimit = Math.floor(Math.random() * 41) + 30;
         let fine = 0;
-        let speedCameraY = -100;
+        let roadOffset = 0;
+        let carX = canvas.width / 2 - 40;
+        let carY = canvas.height - 120;
+        
+        const carImage = new Image();
+        carImage.src = 'car.png'; // Make sure car.png is in the same directory
         
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
+            // Draw road
+            ctx.fillStyle = "#2c3e50";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw dashed road lines
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 5;
+            ctx.setLineDash([20, 20]);
+            ctx.beginPath();
+            for (let y = roadOffset; y < canvas.height; y += 60) {
+                ctx.moveTo(canvas.width / 2 - 2, y);
+                ctx.lineTo(canvas.width / 2 - 2, y + 30);
+            }
+            ctx.stroke();
+            
+            // Move road
+            roadOffset += 5;
+            if (roadOffset > 60) roadOffset = 0;
+            
+            // Draw car image
+            ctx.drawImage(carImage, carX, carY, 80, 40);
+            
             // Draw speed limit sign
             ctx.beginPath();
-            ctx.arc(canvas.width / 2, speedCameraY, 30, 0, Math.PI * 2);
+            ctx.arc(canvas.width / 2, 100, 40, 0, Math.PI * 2);
             ctx.fillStyle = "red";
             ctx.fill();
             ctx.closePath();
             
             ctx.fillStyle = "white";
-            ctx.font = "20px Arial";
-            ctx.fillText(speedLimit, canvas.width / 2 - 10, speedCameraY + 5);
+            ctx.font = "30px Arial";
+            ctx.fillText(speedLimit, canvas.width / 2 - 15, 110);
             
-            // Draw car (or what’s left of it)
-            ctx.fillStyle = "blue";
-            ctx.fillRect(canvas.width / 2 - 40, canvas.height - 100, 80, 40);
-            
-            // Move speed camera
-            speedCameraY += 5;
-            if (speedCameraY > canvas.height) {
-                speedCameraY = -100;
-                speedLimit = Math.floor(Math.random() * 41) + 30;
-                if (speed !== speedLimit) {
-                    fine += Math.abs(speed - speedLimit) * 10;
-                    alert("You got caught speeding! Your bank account is now $" + fine + " lighter.");
-                }
-                document.getElementById("fine").innerText = fine;
+            // Fine system
+            if (speed !== speedLimit) {
+                fine += Math.abs(speed - speedLimit) * 0.1;
+                document.getElementById("fine").innerText = Math.floor(fine);
             }
             
             requestAnimationFrame(draw);
@@ -67,7 +87,14 @@
             document.getElementById("speed").innerText = speed;
         }
         
-        draw();
+        window.addEventListener("resize", () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            carX = canvas.width / 2 - 40;
+            carY = canvas.height - 120;
+        });
+        
+        carImage.onload = draw; // Start the game after the car image loads
     </script>
 </body>
 </html>
